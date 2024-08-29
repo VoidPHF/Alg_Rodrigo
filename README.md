@@ -26,7 +26,7 @@ O Algoritmo Genético (GA) pertence à classe dos algoritmos evolucionários, se
 O Algoritmo de Otimização por Colônia de Formigas (ACO) é inspirado no comportamento coletivo das formigas, que, através de uma organização social altamente estruturada, conseguem realizar tarefas complexas como encontrar o caminho mais curto entre o formigueiro e uma fonte de alimento. No contexto da resolução do TSP, o ACO simula a cooperação das formigas para explorar múltiplas rotas possíveis entre as cidades. As formigas virtuais depositam feromônios ao longo dos caminhos percorridos, reforçando rotas mais curtas e atraindo outras formigas para essas soluções promissoras. Com o tempo, o algoritmo converge para o caminho ótimo ou quase ótimo, fazendo do ACO uma ferramenta poderosa na resolução de problemas combinatórios como o TSP.
 
 
-##Equipe
+## Equipe
 - Heloisa Gonçalves
 - Paulo Henrique
 - Ryan Batista
