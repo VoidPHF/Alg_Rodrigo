@@ -1,4 +1,5 @@
 import random
+from random import randint
 
 """Algoritmo genético"""
 # Ler arquivo Berlin52 e armazenar pontos em uma lista
@@ -26,6 +27,24 @@ def populacao_inicial(tamanho_pop, genes):
 
 # Calcular aptidão
 # Seleção dos pais
+def torneio(aptidao):
+    pai1 = randint(0, len(aptidao) - 1)
+    pai2 = randint(0, len(aptidao) - 1)
+
+    if aptidao[pai1] < aptidao[pai2]: # Retorna a menor aptidão que é o menor percurso
+        return pai1
+    else:
+        return pai2
+
+def selecao_pais(populacao, aptidao):
+    lista_pais = [None] * len(populacao)
+
+    for i in range(len(populacao)):
+        indice = torneio(aptidao)
+        lista_pais[i] = populacao[indice]
+    
+    return lista_pais
+
 # Fazer cruzamento
 # Torneio
 # Mutação
@@ -34,10 +53,11 @@ def populacao_inicial(tamanho_pop, genes):
 def principal():
     # Para fazer a reprodutibilidade
     random.seed(10)
-    # Testando
-    genes = ler_arquivo("berlin52.tsp")
-    lista = populacao_inicial(5, genes)
-    print(lista)
+    # Testando a função de seleção
+    pop = [1, 2, 3, 4, 5, 6, 7]
+    apt = [100, 50, 2, 6, 85, 24, 7]
+    print(selecao_pais(pop, apt))
+    
     
 
 if __name__ == "__main__":
