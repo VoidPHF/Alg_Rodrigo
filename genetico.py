@@ -45,13 +45,13 @@ def criar_filhos(pai1, pai2):
     filho = []
     começo = random.randint(0, len(pai1) - 1)
     fim = random.randint(começo, len(pai1))
-    subrota_pai1 = pai1[começo:fim]
-    subrota_pai2 = list([gene for gene in pai2 if gene not in subrota_pai1])
+    gene_pai1 = pai1[começo:fim]
+    gene_pai2 = list([gene for gene in pai2 if gene not in gene_pai1])
     for i in range (0,(len(pai1))):
         if começo <= i < fim:
-            filho.append(subrota_pai1.pop(0))
+            filho.append(gene_pai1.pop(0))
         else:
-            filho.append(subrota_pai2.pop(0))
+            filho.append(gene_pai2.pop(0))
 
     return filho
 
