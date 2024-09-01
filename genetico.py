@@ -1,5 +1,7 @@
 import random
 
+arquivo='berlin52.tsp'
+
 """Algoritmo genético"""
 # Ler arquivo Berlin52 e armazenar pontos em uma lista
 def ler_arquivo(arquivo):
@@ -21,10 +23,17 @@ def populacao_inicial(tamanho_pop, genes):
     populacao = [None] * tamanho_pop
     for i in range(tamanho_pop):
         individuo = random.sample(genes, len(genes))
-        populacao[i] = individuo
+        populacao[i] = [individuo, 0]
     return populacao
 
-# Calcular aptidão
+def calcular_distancia(individuo):
+    distancia = 0 #distancia inicial 
+    for i in range(len(individuo) - 1): 
+        x1, y1 = individuo[i][1], individuo[i][2] # posição 1 e 2 porque não retirei o ponto/cidades da lista
+        x2, y2 = individuo[i + 1][1], individuo[i + 1][2]
+        distancia += abs(x2 - x1) + abs(y2 - y1)
+    return distancia
+    
 # Seleção dos pais
 # Fazer cruzamento
 # Torneio
@@ -37,8 +46,10 @@ def principal():
     # Testando
     genes = ler_arquivo("berlin52.tsp")
     lista = populacao_inicial(5, genes)
-    print(lista)
     
+    for i, individuo in enumerate(lista): #essa foi a unica forma q meu cerebro frito de encontrou pra usar a variavel individuo
+        distancia = calcular_distancia(individuo[0])
+        print(f"Possibilidade {i}: {individuo[0]} = Distância: {distancia}  <"+ "-"*20)
 
 if __name__ == "__main__":
     principal()
