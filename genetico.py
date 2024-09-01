@@ -26,7 +26,7 @@ def populacao_inicial(tamanho_pop, genes):
     return populacao
 
 # Calcular aptidão
-# Seleção dos pais
+# Seleção dos pais por torneio
 def torneio(aptidao):
     pai1 = randint(0, len(aptidao) - 1)
     pai2 = randint(0, len(aptidao) - 1)
@@ -46,18 +46,60 @@ def selecao_pais(populacao, aptidao):
     return lista_pais
 
 # Fazer cruzamento
-# Torneio
+# Cruzamento PMX
+def cruzamento_pais(pai1, pai2, taxa_cruzamento):
+    if random.random() <= taxa_cruzamento:
+        filho1 = [None] * len(pai1)
+        filho2 = [None] * len(pai1)
+
+        ponto_corte = randint(1, len(pai1)-1) # O ponto de corte sempre vai ser menos da metade
+        
+        filho1[:ponto_corte] = pai1[:ponto_corte]
+        filho2[:ponto_corte] = pai2[:ponto_corte]
+
+        # Definindo o filho1
+        for i in range(ponto_corte, len(pai1)):
+            # if pai2[i] not in filho1:
+            #     filho1[i] = pai2[i]
+            valor = pai2[i]   
+            while valor in filho1:
+                valor = pai2[pai1.index(valor)]
+            filho1[i] = valor
+        
+        # defininco filho2
+        for i in range(ponto_corte, len(pai1)):
+            valor = pai1[i]
+            while valor in filho2:
+                valor = pai1[pai2.index(valor)]
+            filho2[i]= valor
+
+        return filho1, filho2
+    return pai1, pai2
+
+# Cruzamento de todos os pais
+def cruzamento(lista_pais, taxa_cruzamento):
+    lista_filhos = [None] * len(lista_pais)
+    for i in range(0, len(lista_pais), 2):
+        filho1, filho2 = cruzamento_pais(lista_pais[i], lista_pais[i+1], taxa_cruzamento)
+        lista_filhos[i] = filho1
+        lista_filhos[i+1] = filho2
+    return lista_filhos
+
 # Mutação
 
 # Para fazer os testes
 def principal():
     # Para fazer a reprodutibilidade
-    random.seed(10)
-    # Testando a função de seleção
-    pop = [1, 2, 3, 4, 5, 6, 7]
-    apt = [100, 50, 2, 6, 85, 24, 7]
-    print(selecao_pais(pop, apt))
+    random.seed(7)
     
+    # Testando até agora
+    genes = [1, 2, 3, 4, 5]
+    tamanho_pop = 10
+    taxa_cruzamento = 0.9
+    lista_pais = populacao_inicial(tamanho_pop, genes)
+    print(lista_pais)
+    lista_filhos = cruzamento(lista_pais, taxa_cruzamento)
+    print(lista_filhos)
     
 
 if __name__ == "__main__":
