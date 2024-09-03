@@ -18,7 +18,7 @@ def ler_arquivo(arquivo):
             
 
 # inicializando matriz de feromonio
-def matriz_feromonios(cidades, valor_inicial):
+def gerar_matriz_feromonios(cidades, valor_inicial):
     feromonio = [[valor_inicial] * len(cidades) for _ in range(len(cidades))] 
     return feromonio
 
@@ -65,7 +65,7 @@ def depositar_feromonios(k, formiga, matriz_feromonios):
 
 # Atualizar feromonios
 def atualizar_feromonios(formiga, matriz_feromonios, taxa_evaporacao):
-    evaporar_feromonios(matriz_feromonios)
+    evaporar_feromonios(matriz_feromonios, taxa_evaporacao)
 
     for k in range(len(formiga)):
         depositar_feromonios(k, formiga, matriz_feromonios)
@@ -157,17 +157,21 @@ def principal():
     # pontos = [(1, 770.0, 610.0), (2, 345.0, 750.0), (3, 1250.0, 400.0), (4, 420.0, 555.0), (5, 1740.0, 245.0)]
     pontos = ler_arquivo("berlin52.tsp")
 
-    feromonios = matriz_feromonios(pontos, 0.1)
+    feromonios = gerar_matriz_feromonios(pontos, 0.1)
     distancias = gerar_matriz_distancias(pontos)
     qtde_formigas = len(pontos)
+    alfa = 1
+    beta = 2
+    iteracoes = 100
+    taxa_evaporacao = 0.1
     
-    formigas = construir_solucoes(qtde_formigas, len(pontos), feromonios, distancias, 2, 5)
+    for i in range(iteracoes):
+        formigas = construir_solucoes(qtde_formigas, len(pontos), feromonios, distancias, alfa, beta)
+        atualizar_feromonios(formigas, feromonios, taxa_evaporacao)
+    
+        solucao_final, distancia = verificar_melhor_percurso(formigas)
 
-    # for formiga in formigas:
-    #     print("Cidades visitadas:", formiga.cidades_visitadas)
-    #     print("Distância percorrida:", formiga.distancia_percorrida)
-
-    print(verificar_melhor_percurso(formigas))
+    print(solucao_final, distancia)
 
 if __name__ == "__main__":
     principal()
