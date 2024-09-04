@@ -15,21 +15,14 @@ def ler_arquivo(arquivo):
             coordenadas[indice] = (int(parte[0]), float(parte[1]), float(parte[2])) # Guardar o ponto e as coordenadas em uma tupla dentro da lista
     return coordenadas
 
+# Inicializando as formigas
+class Formiga:
+    def __init__(self, qtde_pontos):
+        self.cidades_visitadas = [None] * qtde_pontos
+        self.visitou = [False] * qtde_pontos
+        self.distancia_percorrida = 0
             
-
-# inicializando matriz de feromonio
-def gerar_matriz_feromonios(cidades, valor_inicial):
-    feromonio = [[valor_inicial] * len(cidades) for _ in range(len(cidades))] 
-    return feromonio
-
-# Evaporaçao de feromônios
-def evaporar_feromonios(matriz_feromonios, taxa_evaporacao):
-    for i in range(len(matriz_feromonios)):
-        for j in range(len(matriz_feromonios)):
-            matriz_feromonios[i][j] *= (1-taxa_evaporacao)
-
-
-# Cada formiga escolhe a proxima cidade com base na quantidade de feromônios ou distância => retorna distância entre dois pontos
+# Retorna distância entre dois pontos
 def calcular_distancia(cidade_a, cidade_b):
     distancia = ((cidade_a[1] - cidade_b[1]) ** 2 + (cidade_a[2] - cidade_b[2]) ** 2) ** 0.5
     return distancia
@@ -42,36 +35,40 @@ def gerar_matriz_distancias(cidades):
             arestas[i][j] = calcular_distancia(cidades[i], cidades[j])
     return arestas
 
-# Inicializando as formigas
-class Formiga:
-    def __init__(self, qtde_pontos):
-        self.cidades_visitadas = [None] * qtde_pontos
-        self.visitou = [False] * qtde_pontos
-        self.distancia_percorrida = 0
+# Inicializando matriz de feromonio
+def gerar_matriz_feromonios(cidades, valor_inicial):
+    feromonio = [[valor_inicial] * len(cidades) for _ in range(len(cidades))] 
+    return feromonio
+
+# Evaporaçao de feromônios
+def evaporar_feromonios(matriz_feromonios, taxa_evaporacao):
+    for i in range(len(matriz_feromonios)):
+        for j in range(len(matriz_feromonios)):
+            matriz_feromonios[i][j] *= (1-taxa_evaporacao)
 
 # Deposicao de feromônios
-def depositar_feromonios(k, formiga, matriz_feromonios):
+def depositar_feromonios(k, formiga, matriz_feromonios, taxa_deposicao):
     for i in range(len(formiga[k].cidades_visitadas) - 1):
         cidade_a = formiga[k].cidades_visitadas[i]
         cidade_b = formiga[k].cidades_visitadas[i+1]
-        matriz_feromonios[cidade_a][cidade_b] += 100 / formiga[k].distancia_percorrida
+        matriz_feromonios[cidade_a][cidade_b] += taxa_deposicao / formiga[k].distancia_percorrida
         matriz_feromonios[cidade_b][cidade_a] = matriz_feromonios[cidade_a][cidade_b]
     
     # Fechando ciclo hamiltoniano
     cidade_a = formiga[k].cidades_visitadas[-1]
     cidade_b = formiga[k].cidades_visitadas[0]
-    matriz_feromonios[cidade_a][cidade_b] += 100 / formiga[k].distancia_percorrida
+    matriz_feromonios[cidade_a][cidade_b] += taxa_deposicao / formiga[k].distancia_percorrida
     matriz_feromonios[cidade_b][cidade_a] = matriz_feromonios[cidade_a][cidade_b]
 
 # Atualizar feromonios
-def atualizar_feromonios(formiga, matriz_feromonios, taxa_evaporacao):
+def atualizar_feromonios(formiga, matriz_feromonios, taxa_evaporacao, taxa_deposicao):
     evaporar_feromonios(matriz_feromonios, taxa_evaporacao)
 
     for k in range(len(formiga)):
-        depositar_feromonios(k, formiga, matriz_feromonios)
+        depositar_feromonios(k, formiga, matriz_feromonios, taxa_deposicao)
 
-# Calculando as Probabilidades
-def probabilidade(cidade_atual, matriz_feromonios, matriz_distancias, formiga, qtde_pontos, a, b):
+# Calculando as Probabilidades => Retorna lista com a probabilidade de visitar as proximas cidades
+def calcular_probabilidades(cidade_atual, matriz_feromonios, matriz_distancias, formiga, qtde_pontos, a, b):
     probabilidades = []
     for cidade in range(qtde_pontos):
         if not formiga.visitou[cidade]:
@@ -80,14 +77,15 @@ def probabilidade(cidade_atual, matriz_feromonios, matriz_distancias, formiga, q
             probabilidades.append(valor_feromonio * valor_distancia)
         else:
             probabilidades.append(0)
-    # Tornando as probabilidades em porcentagem
+
     total = sum(probabilidades)
     if total > 0:
         probabilidades = [probabilidade / total for probabilidade in probabilidades]
     
     return probabilidades
 
-def prox_cidade(probabilidades, formiga, passo_atual):
+# Definir qual cidade visita a partir do passo atual 
+def definir_prox_cidade(probabilidades, formiga, passo_atual):
     while True:
         prox_cidade = random.choices(range(len(probabilidades)), probabilidades)[0]
         if not formiga.visitou[prox_cidade]:
@@ -103,7 +101,6 @@ def distancia_percorrida(formiga, matriz_distancias):
         cidade_b = formiga.cidades_visitadas[i+1]
 
         if cidade_a is None or cidade_b is None:
-            # print(f"Erro: cidade_a ou cidade_b é None. cidade_a: {cidade_a}, cidade_b: {cidade_b}")
             continue
 
         distancia += matriz_distancias[cidade_a][cidade_b]
@@ -119,21 +116,21 @@ def construir_solucoes(qtde_formigas, qtde_pontos, matriz_feromonios, matriz_dis
         formiga.cidades_visitadas[0] = cidade_inicial
         formiga.visitou[cidade_inicial] = True
 
-    # lista de cidades para iniciar
+    # # Lista de cidades para iniciar
     # cidades_iniciais = list(range(qtde_pontos))
 
+    # # Colocando uma formiga em cada ponto do mapa
     # for i, formiga in enumerate(formigas):
     #     cidade_inicial = cidades_iniciais[i]
     #     formiga.cidades_visitadas[0] = cidade_inicial
     #     formiga.visitou[cidade_inicial] = True
-    
-    
 
+    # Construindo as soluções para cada formiga
     for passo_atual in range(1, qtde_pontos):
         for formiga in formigas:
             cidade_atual = formiga.cidades_visitadas[passo_atual - 1]
-            probabilidades = probabilidade(cidade_atual, matriz_feromonios, matriz_distancias, formiga, qtde_pontos, a, b)
-            prox_cidade(probabilidades, formiga, passo_atual) 
+            probabilidades = calcular_probabilidades(cidade_atual, matriz_feromonios, matriz_distancias, formiga, qtde_pontos, a, b)
+            definir_prox_cidade(probabilidades, formiga, passo_atual) 
             formiga.distancia_percorrida = distancia_percorrida(formiga, matriz_distancias)
     
     return formigas
@@ -153,21 +150,23 @@ def verificar_melhor_percurso(formigas):
 def principal():
     # Para fazer a reprodutibilidade
     random.seed(10)
-    # Testando
-    # pontos = [(1, 770.0, 610.0), (2, 345.0, 750.0), (3, 1250.0, 400.0), (4, 420.0, 555.0), (5, 1740.0, 245.0)]
+
     pontos = ler_arquivo("berlin52.tsp")
 
-    feromonios = gerar_matriz_feromonios(pontos, 0.1)
+    feromonio_inicial = 0.1
+
+    feromonios = gerar_matriz_feromonios(pontos, feromonio_inicial)
     distancias = gerar_matriz_distancias(pontos)
     qtde_formigas = len(pontos)
     alfa = 1
     beta = 2
-    iteracoes = 100
+    iteracoes = 150
     taxa_evaporacao = 0.1
+    taxa_deposicao = 100
     
     for i in range(iteracoes):
         formigas = construir_solucoes(qtde_formigas, len(pontos), feromonios, distancias, alfa, beta)
-        atualizar_feromonios(formigas, feromonios, taxa_evaporacao)
+        atualizar_feromonios(formigas, feromonios, taxa_evaporacao, taxa_deposicao)
     
         solucao_final, distancia = verificar_melhor_percurso(formigas)
 
