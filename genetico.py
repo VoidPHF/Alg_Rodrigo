@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 import math
 import random
 import os
@@ -21,7 +22,7 @@ def distancia_total(pontos, rota):
 
 def gerar_solucao_aleatoria(total_solucoes):
     caminhos_aleatorios = []
-    for _ in range (10000):
+    for _ in range (1000):
         rota_aleatoria = list(range(1,  total_solucoes))
         random.shuffle(rota_aleatoria)
         rota_aleatoria = [0] + rota_aleatoria
@@ -91,7 +92,7 @@ def main():
     total_solucoes = len(pontos)
     populacao_inicial = gerar_solucao_aleatoria(total_solucoes)
     
-    for geracao in range(100):
+    for geracao in range(1000):
         print(f"Geração {geracao+1}")
         populacao_nova = gerar_nova_população(pontos, populacao_inicial)
         melhor_rota = encontrar_melhor_rota(pontos, populacao_nova)
@@ -99,6 +100,21 @@ def main():
         print(f"Distância total: {distancia_total(pontos, melhor_rota)}")
         print("————————————————————————")
         populacao_inicial = populacao_nova
+
+    # Crie as listas de coordenadas x e y
+    x_coords = [pontos[melhor_rota[i]][0] for i in range(len(melhor_rota))]
+    y_coords = [pontos[melhor_rota[i]][1] for i in range(len(melhor_rota))]
+
+    # Crie o gráfico
+    plt.figure(figsize=(8, 6))
+    plt.plot(x_coords, y_coords, 'r-')
+    plt.scatter(x_coords, y_coords, color='blue')
+    plt.title('Melhor Rota')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.grid(True)
+    plt.show()
+
 
 if __name__ == "__main__":
     main()
