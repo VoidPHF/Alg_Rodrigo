@@ -1,7 +1,5 @@
 import math
 import random
-import os
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def ler_arquivo(arquivo):
     coordenadas = [None for i in range(52)]
@@ -19,13 +17,6 @@ def ler_arquivo(arquivo):
 def distancia_total(pontos, rota):
     return sum(math.dist(pontos[rota[i-1]], pontos[rota[i]]) for i in range (1, len(rota)))
 
-def gerar_solucao_aleatoria(total_solucoes):
-    caminhos_aleatorios = []
-    for _ in range (10000):
-        rota_aleatoria = list(range(1,  total_solucoes))
-        random.shuffle(rota_aleatoria)
-        rota_aleatoria = [0] + rota_aleatoria
-        caminhos_aleatorios.append(rota_aleatoria)
     
     return caminhos_aleatorios
 
