@@ -1,8 +1,6 @@
+import math
 import random
-from random import randint
 
-"""Algoritmo genético"""
-# Ler arquivo Berlin52 e armazenar pontos em uma lista
 def ler_arquivo(arquivo):
     coordenadas = [None for i in range(52)]
     with open(arquivo, "r") as f:
@@ -13,94 +11,85 @@ def ler_arquivo(arquivo):
                 break
             parte = caractere.split()
             indice = int(parte[0])- 1 # para inserir em cada posição da lista coordenadas
-            coordenadas[indice] = (int(parte[0]), float(parte[1]), float(parte[2])) # Guardar o ponto e as coordenadas em uma tupla dentro da lista
+            coordenadas[indice] = (float(parte[1]), float(parte[2])) # Guardar o ponto e as coordenadas em uma tupla dentro da lista
     return coordenadas
 
+def distancia_total(pontos, rota):
+    return sum(math.dist(pontos[rota[i-1]], pontos[rota[i]]) for i in range (1, len(rota)))
 
-#Criar população inicial
-def populacao_inicial(tamanho_pop, genes):
-    populacao = [None] * tamanho_pop
-    for i in range(tamanho_pop):
-        individuo = random.sample(genes, len(genes))
-        populacao[i] = individuo
-    return populacao
-
-# Calcular aptidão
-# Seleção dos pais por torneio
-def torneio(aptidao):
-    pai1 = randint(0, len(aptidao) - 1)
-    pai2 = randint(0, len(aptidao) - 1)
-
-    if aptidao[pai1] < aptidao[pai2]: # Retorna a menor aptidão que é o menor percurso
-        return pai1
-    else:
-        return pai2
-
-def selecao_pais(populacao, aptidao):
-    lista_pais = [None] * len(populacao)
-
-    for i in range(len(populacao)):
-        indice = torneio(aptidao)
-        lista_pais[i] = populacao[indice]
     
-    return lista_pais
+    return caminhos_aleatorios
 
-# Fazer cruzamento
-# Cruzamento PMX
-def cruzamento_pais(pai1, pai2, taxa_cruzamento):
-    if random.random() <= taxa_cruzamento:
-        filho1 = [None] * len(pai1)
-        filho2 = [None] * len(pai1)
+def escolher_sobreviventes(pontos, populacao_antiga):
+    sobreviventes = []
+    random.shuffle(populacao_antiga)
+    metade = len(populacao_antiga) // 2
+    for i in range (metade):
+        if distancia_total(pontos, populacao_antiga[i]) <  distancia_total(pontos, populacao_antiga[i + metade]):
+            sobreviventes.append(populacao_antiga[i])
+        else:
+            sobreviventes.append(populacao_antiga[i+metade])
 
-        ponto_corte = randint(1, len(pai1)-1) # O ponto de corte sempre vai ser menos da metade
-        
-        filho1[:ponto_corte] = pai1[:ponto_corte]
-        filho2[:ponto_corte] = pai2[:ponto_corte]
+    return sobreviventes
 
-        # Definindo o filho1
-        for i in range(ponto_corte, len(pai1)):
-            # if pai2[i] not in filho1:
-            #     filho1[i] = pai2[i]
-            valor = pai2[i]   
-            while valor in filho1:
-                valor = pai2[pai1.index(valor)]
-            filho1[i] = valor
-        
-        # defininco filho2
-        for i in range(ponto_corte, len(pai1)):
-            valor = pai1[i]
-            while valor in filho2:
-                valor = pai1[pai2.index(valor)]
-            filho2[i]= valor
+def criar_filhos(pai1, pai2):
+    filho = []
+    começo = random.randint(0, len(pai1) - 1)
+    fim = random.randint(começo, len(pai1))
+    gene_pai1 = pai1[começo:fim]
+    gene_pai2 = list([gene for gene in pai2 if gene not in gene_pai1])
+    for i in range (0,(len(pai1))):
+        if começo <= i < fim:
+            filho.append(gene_pai1.pop(0))
+        else:
+            filho.append(gene_pai2.pop(0))
 
-        return filho1, filho2
-    return pai1, pai2
+    return filho
 
-# Cruzamento de todos os pais
-def cruzamento(lista_pais, taxa_cruzamento):
-    lista_filhos = [None] * len(lista_pais)
-    for i in range(0, len(lista_pais), 2):
-        filho1, filho2 = cruzamento_pais(lista_pais[i], lista_pais[i+1], taxa_cruzamento)
-        lista_filhos[i] = filho1
-        lista_filhos[i+1] = filho2
-    return lista_filhos
+def crossover(sobreviventes):
+    filhos = []
+    metade = len(sobreviventes) // 2
+    for i in range (metade):
+        pai1, pai2 = sobreviventes[i], sobreviventes [i+metade]
+        for _ in range(2):
+            filhos.append(criar_filhos(pai1, pai2))
+            filhos.append(criar_filhos(pai2, pai1))
+    return filhos
 
-# Mutação
+def mutação(nova_geração):
+    geração_mutada = []
+    for rota in nova_geração:
+        if random.random() < 0.009:
+            ponto1, ponto2 = random.randint(1, len(rota)- 1), random.randint(1, len(rota)- 1)
+            rota[ponto1], rota[ponto2] = rota [ponto2], rota[ponto1]
+        geração_mutada.append(rota)
 
-# Para fazer os testes
-def principal():
-    # Para fazer a reprodutibilidade
-    random.seed(7)
+    return geração_mutada
+
+def gerar_nova_população(pontos, populacao_antiga):
+    sobreviventes = escolher_sobreviventes(pontos, populacao_antiga)
+    filhos = crossover(sobreviventes)
+    nova_geração = mutação(filhos)
+    return nova_geração
+
+def encontrar_melhor_rota(pontos, populacao):
+    melhor_rota = min(populacao, key=lambda rota: distancia_total(pontos, rota))
+    return melhor_rota
+
+def main():
+    arquivo = "berlin52.tsp"
+    pontos = ler_arquivo(arquivo)
+    total_solucoes = len(pontos)
+    populacao_inicial = gerar_solucao_aleatoria(total_solucoes)
     
-    # Testando até agora
-    genes = [1, 2, 3, 4, 5]
-    tamanho_pop = 10
-    taxa_cruzamento = 0.9
-    lista_pais = populacao_inicial(tamanho_pop, genes)
-    print(lista_pais)
-    lista_filhos = cruzamento(lista_pais, taxa_cruzamento)
-    print(lista_filhos)
-    
+    for geracao in range(100):
+        print(f"Geração {geracao+1}")
+        populacao_nova = gerar_nova_população(pontos, populacao_inicial)
+        melhor_rota = encontrar_melhor_rota(pontos, populacao_nova)
+        print(f"Melhor rota: {melhor_rota}")
+        print(f"Distância total: {distancia_total(pontos, melhor_rota)}")
+        print("————————————————————————")
+        populacao_inicial = populacao_nova
 
 if __name__ == "__main__":
-    principal()
+    main()
