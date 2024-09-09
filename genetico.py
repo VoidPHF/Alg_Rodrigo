@@ -1,8 +1,6 @@
 from matplotlib import pyplot as plt
 import math
 import random
-import os
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def ler_arquivo(arquivo):
     coordenadas = [None for i in range(52)]
