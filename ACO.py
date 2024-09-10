@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 import random
 
 """Algoritmo de otimização colônia de formigas"""
@@ -171,6 +172,24 @@ def principal():
         solucao_final, distancia = verificar_melhor_percurso(formigas)
 
     print(solucao_final, distancia)
+
+    # Crie as listas de coordenadas x e y
+    x_coords = [pontos[solucao_final[i]][1] for i in range(len(solucao_final))]
+    y_coords = [pontos[solucao_final[i]][2] for i in range(len(solucao_final))]
+
+    #Fechar o grafo
+    x_coords.append(x_coords[0])
+    y_coords.append(y_coords[0])
+
+    # Crie o gráfico
+    plt.figure(figsize=(8, 6))
+    plt.plot(x_coords, y_coords, 'r-')
+    plt.scatter(x_coords, y_coords, color='blue')
+    plt.title('Melhor Rota')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.grid(True)
+    plt.show()
 
 if __name__ == "__main__":
     principal()
